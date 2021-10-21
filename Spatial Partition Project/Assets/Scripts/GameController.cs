@@ -73,6 +73,8 @@ namespace SpatialPartitionPattern
 
         void Update()
         {
+            float startTime = Time.realtimeSinceStartup;
+
             //Move the enemies
             for (int i = 0; i < enemySoldiers.Count; i++)
             {
@@ -108,6 +110,9 @@ namespace SpatialPartitionPattern
                     friendlySoldiers[i].Move(closestEnemy);
                 }
             }
+
+            float elapsedTime = (Time.realtimeSinceStartup - startTime) * 1000f;
+            Debug.Log(elapsedTime + "ms");
         }
 
 
