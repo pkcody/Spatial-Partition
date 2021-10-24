@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace SpatialPartitionPattern
 {
@@ -29,12 +30,53 @@ namespace SpatialPartitionPattern
         int cellSize = 10;
 
         //Number of soldiers on each team
-        int numberOfSoldiers = 100;
+        public int numberOfSoldiers = 750;
+        public bool spatialPartition = false;
+
+        //Buttons
+        Toggle sp_toggle;
+        public Text time;
 
         //The Spatial Partition grid
         Grid grid;
 
+        public void SPToggleChange(Toggle change)
+        {
+            if (change.isOn)
+                spatialPartition = true;
+            else
+                spatialPartition = false;
+        }
+        public void ButtonAPressed()
+        {
+            if(numberOfSoldiers != 10)
+                numberOfSoldiers = 10;
+            UpdateCount();
+        }
+        public void ButtonBPressed()
+        {
+            if (numberOfSoldiers != 100)
+                numberOfSoldiers = 100;
+            UpdateCount();
+        }
+        public void ButtonCPressed()
+        {
+            if (numberOfSoldiers != 1000)
+                numberOfSoldiers = 1000;
+            UpdateCount();
+        }
 
+        public void UpdateCount()
+        {
+            GameObject[] soldier = GameObject.FindGameObjectsWithTag("Soldier");
+            foreach(GameObject child in soldier)
+                Destroy(child);
+           // Destroy(friendlyObj);
+
+            enemySoldiers.Clear();
+            friendlySoldiers.Clear();
+            Start();
+        }
         void Start()
         {
             //Create a new grid
@@ -44,7 +86,7 @@ namespace SpatialPartitionPattern
             for (int i = 0; i < numberOfSoldiers; i++)
             {
                 //Give the enemy a random position
-                Vector3 randomPos = new Vector3(Random.Range(0f, mapWidth), 0.5f, Random.Range(0f, mapWidth));
+                Vector3 randomPos = new Vector3(Random.Range(0f, mapWidth), Random.Range(0f, mapWidth), Random.Range(0f, mapWidth));
 
                 //Create a new enemy
                 GameObject newEnemy = Instantiate(enemyObj, randomPos, Quaternion.identity) as GameObject;
@@ -55,9 +97,8 @@ namespace SpatialPartitionPattern
                 //Parent it
                 newEnemy.transform.parent = enemyParent;
 
-
                 //Give the friendly a random position
-                randomPos = new Vector3(Random.Range(0f, mapWidth), 0.5f, Random.Range(0f, mapWidth));
+                randomPos = new Vector3(Random.Range(0f, mapWidth), Random.Range(0f, mapWidth), Random.Range(0f, mapWidth));
 
                 //Create a new friendly
                 GameObject newFriendly = Instantiate(friendlyObj, randomPos, Quaternion.identity) as GameObject;
@@ -67,6 +108,10 @@ namespace SpatialPartitionPattern
 
                 //Parent it 
                 newFriendly.transform.parent = friendlyParent;
+
+                //add toggle for sp
+                sp_toggle = GetComponent<Toggle>();
+               
             }
         }
 
@@ -90,13 +135,16 @@ namespace SpatialPartitionPattern
             //Reset the list with closest enemies
             closestEnemies.Clear();
 
+            Soldier closestEnemy;
+
             //For each friendly, find the closest enemy and change its color and chase it
             for (int i = 0; i < friendlySoldiers.Count; i++)
             {
-                //Soldier closestEnemy = FindClosestEnemySlow(friendlySoldiers[i]);
-
+                if(!spatialPartition)
+                    closestEnemy = FindClosestEnemySlow(friendlySoldiers[i]);
+                else
                 //The fast version with spatial partition
-                Soldier closestEnemy = grid.FindClosestEnemy(friendlySoldiers[i]);
+                    closestEnemy = grid.FindClosestEnemy(friendlySoldiers[i]);
 
                 //If we found an enemy
                 if (closestEnemy != null)
@@ -111,8 +159,7 @@ namespace SpatialPartitionPattern
                 }
             }
 
-            float elapsedTime = (Time.realtimeSinceStartup - startTime) * 1000f;
-            Debug.Log(elapsedTime + "ms");
+            time.text = ((Time.realtimeSinceStartup - startTime) * 1000f)+ "ms";
         }
 
 
@@ -120,7 +167,6 @@ namespace SpatialPartitionPattern
         Soldier FindClosestEnemySlow(Soldier soldier)
         {
             Soldier closestEnemy = null;
-
             float bestDistSqr = Mathf.Infinity;
 
             //Loop thorugh all enemies
@@ -133,11 +179,9 @@ namespace SpatialPartitionPattern
                 if (distSqr < bestDistSqr)
                 {
                     bestDistSqr = distSqr;
-
                     closestEnemy = enemySoldiers[i];
                 }
             }
-
             return closestEnemy;
         }
     }

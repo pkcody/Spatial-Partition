@@ -10,7 +10,7 @@ namespace SpatialPartitionPattern
 
         //This is the actual grid, where a soldier is in each cell
         //Each individual soldier links to other soldiers in the same cell
-        Soldier[,] cells;
+        Soldier[,,] cells;
 
 
         //Init the grid
@@ -20,7 +20,7 @@ namespace SpatialPartitionPattern
 
             int numberOfCells = mapWidth / cellSize;
 
-            cells = new Soldier[numberOfCells, numberOfCells];
+            cells = new Soldier[numberOfCells, numberOfCells, numberOfCells];
         }
 
 
@@ -30,13 +30,14 @@ namespace SpatialPartitionPattern
             //Determine which grid cell the soldier is in
             int cellX = (int)(soldier.soldierTrans.position.x / cellSize);
             int cellZ = (int)(soldier.soldierTrans.position.z / cellSize);
+            int cellY = (int)(soldier.soldierTrans.position.y / cellSize);
 
             //Add the soldier to the front of the list for the cell it's in
             soldier.previousSoldier = null;
-            soldier.nextSoldier = cells[cellX, cellZ];
+            soldier.nextSoldier = cells[cellX, cellY, cellZ];
 
             //Associate this cell with this soldier
-            cells[cellX, cellZ] = soldier;
+            cells[cellX, cellY, cellZ] = soldier;
 
             if (soldier.nextSoldier != null)
             {
@@ -52,9 +53,10 @@ namespace SpatialPartitionPattern
             //Determine which grid cell the friendly soldier is in
             int cellX = (int)(friendlySoldier.soldierTrans.position.x / cellSize);
             int cellZ = (int)(friendlySoldier.soldierTrans.position.z / cellSize);
+            int cellY = (int)(friendlySoldier.soldierTrans.position.y / cellSize);
 
             //Get the first enemy in grid
-            Soldier enemy = cells[cellX, cellZ];
+            Soldier enemy = cells[cellX, cellY, cellZ];
 
             //Find the closest soldier of all in the linked list
             Soldier closestSoldier = null;
@@ -89,13 +91,16 @@ namespace SpatialPartitionPattern
             //See which cell it was in 
             int oldCellX = (int)(oldPos.x / cellSize);
             int oldCellZ = (int)(oldPos.z / cellSize);
+            int oldCellY = (int)(oldPos.y / cellSize);
 
             //See which cell it is in now
             int cellX = (int)(soldier.soldierTrans.position.x / cellSize);
             int cellZ = (int)(soldier.soldierTrans.position.z / cellSize);
+            int cellY = (int)(soldier.soldierTrans.position.y / cellSize);
+
 
             //If it didn't change cell, we are done
-            if (oldCellX == cellX && oldCellZ == cellZ)
+            if (oldCellX == cellX && oldCellY == cellY && oldCellZ == cellZ)
             {
                 return;
             }
@@ -112,9 +117,9 @@ namespace SpatialPartitionPattern
             }
 
             //If it's the head of a list, remove it
-            if (cells[oldCellX, oldCellZ] == soldier)
+            if (cells[oldCellX, oldCellY, oldCellZ] == soldier)
             {
-                cells[oldCellX, oldCellZ] = soldier.nextSoldier;
+                cells[oldCellX, oldCellY, oldCellZ] = soldier.nextSoldier;
             }
 
             //Add it bacl to the grid at its new cell

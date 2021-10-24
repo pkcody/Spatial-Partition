@@ -64,7 +64,7 @@ namespace SpatialPartitionPattern
         //Give the enemy a new target to move towards and rotate towards that target
         void GetNewTarget()
         {
-            currentTarget = new Vector3(Random.Range(0f, mapWidth), 0.5f, Random.Range(0f, mapWidth));
+            currentTarget = new Vector3(Random.Range(0f, mapWidth), Random.Range(0f, mapWidth), Random.Range(0f, mapWidth));
 
             //Rotate towards the target
             soldierTrans.rotation = Quaternion.LookRotation(currentTarget - soldierTrans.position);
